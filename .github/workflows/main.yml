@@ -1,0 +1,32 @@
+name: Hourly Update
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Her saatin başında çalışır (00:00, 01:00...)
+  workflow_dispatch: # İstediğiniz zaman manuel çalıştırmak için buton ekler
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Execute Python script
+        run: python fetch_link.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add now.m3u8
+          git commit -m "Otomatik Link Güncelleme" || exit 0
+          git push
